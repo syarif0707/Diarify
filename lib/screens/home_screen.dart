@@ -6,6 +6,7 @@ import '../utils/app_constants.dart';
 import 'add_edit_entry_screen.dart';
 import 'reflection_screen.dart';
 import '../widgets/diary_card.dart';
+import 'setting_screen.dart'; // Import the SettingScreen
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   DateTime _selectedDate = DateTime.now();
   int _currentIndex = 0; // For Bottom Navigation Bar
   final TextEditingController _searchController = TextEditingController();
-  bool _isSearching = false; // To toggle search bar visibility
+  bool _showSearchBar = false; // To toggle search bar visibility
 
   @override
   void initState() {
@@ -40,6 +41,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadDiaryEntries() async {
     if (AppConstants.currentUserId == null) {
       // Handle case where user ID is not set (e.g., redirect to login)
+      setState(() {
+        _allDiaryEntries = [];
+        _filteredDiaryEntries = [];
+      });
       return;
     }
     List<DiaryEntry> entries = await _dbHelper.getDiaryEntriesByDate(
@@ -60,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
       } else {
         _filteredDiaryEntries = _allDiaryEntries.where((entry) {
           return entry.title.toLowerCase().contains(query) ||
-                 entry.content.toLowerCase().contains(query);
+              entry.content.toLowerCase().contains(query);
         }).toList();
       }
     });
@@ -161,47 +166,73 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: _isSearching
-            ? TextField(
-                controller: _searchController,
-                decoration: const InputDecoration(
-                  hintText: 'Search entries...',
-                  hintStyle: TextStyle(color: Colors.white70),
-                  border: InputBorder.none,
-                ),
-                style: const TextStyle(color: Colors.white, fontSize: 18),
-                cursorColor: Colors.white,
-              )
-            : const Text('Diarify'),
+        // Removed `leading` property and put all actions back into `actions` list
+        title: const Text(
+          'Diarify',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
         actions: [
+          // Refresh button (now on the right)
           IconButton(
-            icon: const Icon(Icons.calendar_today),
-            onPressed: () => _selectDate(context),
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadDiaryEntries,
           ),
+          // Settings button (now on the right)
           IconButton(
-            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const SettingScreen()),
+              );
+            },
+          ),
+          // Search Icon Button (to toggle search bar visibility below AppBar)
+          IconButton(
+            icon: Icon(_showSearchBar ? Icons.close : Icons.search),
             onPressed: () {
               setState(() {
-                _isSearching = !_isSearching;
-                if (!_isSearching) {
+                _showSearchBar = !_showSearchBar;
+                if (!_showSearchBar) {
                   _searchController.clear(); // Clear search when closing
                 }
               });
             },
           ),
+          // Calendar button back in actions
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadDiaryEntries,
+            icon: const Icon(Icons.calendar_today),
+            onPressed: () => _selectDate(context),
           ),
         ],
       ),
       body: Column(
         children: [
+          // Search Bar below AppBar
+          if (_showSearchBar) // Conditionally show the search bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search entries...',
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Theme.of(context).cardColor, // Use card color for background
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
+                ),
+                style: const TextStyle(fontSize: 16),
+                onChanged: (value) => _onSearchChanged(), // Trigger search on change
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              'Entries for: ${DateFormat('EEEE, MMM d, yyyy').format(_selectedDate)}',
+              'Entries for: ${DateFormat('EEEE, MMM d, yyyy').format(_selectedDate)}', // Corrected format to include year
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),
@@ -267,6 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+      // FAB for Add New Entry remains centerDocked
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () => _onFabTapped(context),

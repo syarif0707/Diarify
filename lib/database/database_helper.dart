@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:intl/intl.dart'; // <--- ADD THIS LINE
 import '../models/user.dart';
 import '../models/diary_entry.dart';
 
@@ -111,7 +112,7 @@ class DatabaseHelper {
 
   Future<List<DiaryEntry>> getDiaryEntriesByDate(int userId, DateTime date) async {
     final db = await database;
-    String formattedDate = date.toIso8601String().split('T')[0]; // YYYY-MM-DD
+    String formattedDate = DateFormat('yyyy-MM-dd').format(date); // Corrected this line
     final List<Map<String, dynamic>> maps = await db.query(
       'diary_entries',
       where: 'userId = ? AND entryDate LIKE ?',
@@ -194,5 +195,31 @@ class DatabaseHelper {
       weeklyCounts[row['week']] = row['count'] as int;
     }
     return weeklyCounts;
+  }
+
+  // These methods were misplaced outside the class.
+  // They are now correctly moved inside the DatabaseHelper class.
+  Future<User?> getUserById(int id) async {
+    final db = await database;
+    List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    if (maps.isNotEmpty) {
+      return User.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  Future<int> updateUser(User user) async {
+    final db = await database;
+    return await db.update(
+      'users',
+      user.toMap(),
+      where: 'id = ?',
+      whereArgs: [user.id],
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 }
