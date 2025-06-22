@@ -1,11 +1,11 @@
-import 'package:diarify/utils/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../database/database_helper.dart';
 import '../models/diary_entry.dart';
+import '../utils/app_constants.dart';
 import 'add_edit_entry_screen.dart';
 import 'reflection_screen.dart';
-import '../widgets/diary_card.dart'; // Custom widget for diary entry display
+import '../widgets/diary_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,14 +16,25 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
-  List<DiaryEntry> _diaryEntries = [];
+  List<DiaryEntry> _allDiaryEntries = []; // Stores all entries for the selected date
+  List<DiaryEntry> _filteredDiaryEntries = []; // Stores entries filtered by search
   DateTime _selectedDate = DateTime.now();
   int _currentIndex = 0; // For Bottom Navigation Bar
+  final TextEditingController _searchController = TextEditingController();
+  bool _isSearching = false; // To toggle search bar visibility
 
   @override
   void initState() {
     super.initState();
     _loadDiaryEntries();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadDiaryEntries() async {
@@ -36,7 +47,22 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedDate,
     );
     setState(() {
-      _diaryEntries = entries;
+      _allDiaryEntries = entries;
+      _onSearchChanged(); // Apply current search filter after loading new entries
+    });
+  }
+
+  void _onSearchChanged() {
+    String query = _searchController.text.toLowerCase();
+    setState(() {
+      if (query.isEmpty) {
+        _filteredDiaryEntries = List.from(_allDiaryEntries);
+      } else {
+        _filteredDiaryEntries = _allDiaryEntries.where((entry) {
+          return entry.title.toLowerCase().contains(query) ||
+                 entry.content.toLowerCase().contains(query);
+        }).toList();
+      }
     });
   }
 
@@ -50,6 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
+        _searchController.clear(); // Clear search when date changes
       });
       _loadDiaryEntries(); // Reload entries for the new date
     }
@@ -134,7 +161,18 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Diarify'),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: 'Search entries...',
+                  hintStyle: TextStyle(color: Colors.white70),
+                  border: InputBorder.none,
+                ),
+                style: const TextStyle(color: Colors.white, fontSize: 18),
+                cursorColor: Colors.white,
+              )
+            : const Text('Diarify'),
         centerTitle: true,
         actions: [
           IconButton(
@@ -142,7 +180,18 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () => _selectDate(context),
           ),
           IconButton(
-            icon: const Icon(Icons.refresh), // Add refresh button
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            onPressed: () {
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchController.clear(); // Clear search when closing
+                }
+              });
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
             onPressed: _loadDiaryEntries,
           ),
         ],
@@ -157,12 +206,18 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Expanded(
-            child: _diaryEntries.isEmpty
-                ? const Center(child: Text('No diary entries for this date. Create one!'))
+            child: _filteredDiaryEntries.isEmpty
+                ? Center(
+                    child: Text(
+                      _searchController.text.isEmpty
+                          ? 'No diary entries for this date. Create one!'
+                          : 'No entries found matching "${_searchController.text}".',
+                    ),
+                  )
                 : ListView.builder(
-                    itemCount: _diaryEntries.length,
+                    itemCount: _filteredDiaryEntries.length,
                     itemBuilder: (context, index) {
-                      final entry = _diaryEntries[index];
+                      final entry = _filteredDiaryEntries[index];
                       return Dismissible(
                         key: Key(entry.id.toString()), // Unique key for Dismissible
                         direction: DismissDirection.endToStart,
