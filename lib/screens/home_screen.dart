@@ -17,12 +17,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
-  List<DiaryEntry> _allDiaryEntries = []; // Stores all entries for the selected date
-  List<DiaryEntry> _filteredDiaryEntries = []; // Stores entries filtered by search
+  List<DiaryEntry> _allDiaryEntries = [];
+  List<DiaryEntry> _filteredDiaryEntries = [];
   DateTime _selectedDate = DateTime.now();
-  int _currentIndex = 0; // For Bottom Navigation Bar
+  int _currentIndex = 0;
   final TextEditingController _searchController = TextEditingController();
-  bool _showSearchBar = false; // To toggle search bar visibility
 
   @override
   void initState() {
@@ -40,7 +39,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadDiaryEntries() async {
     if (AppConstants.currentUserId == null) {
-      // Handle case where user ID is not set (e.g., redirect to login)
       setState(() {
         _allDiaryEntries = [];
         _filteredDiaryEntries = [];
@@ -53,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     setState(() {
       _allDiaryEntries = entries;
-      _onSearchChanged(); // Apply current search filter after loading new entries
+      _onSearchChanged();
     });
   }
 
@@ -81,9 +79,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
-        _searchController.clear(); // Clear search when date changes
+        _searchController.clear();
       });
-      _loadDiaryEntries(); // Reload entries for the new date
+      _loadDiaryEntries();
     }
   }
 
@@ -99,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: const Icon(Icons.add),
                 title: const Text('Add New Entry'),
                 onTap: () {
-                  Navigator.pop(context); // Close bottom sheet
+                  Navigator.pop(context);
                   _navigateToAddEditEntry(context, null);
                 },
               ),
@@ -107,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: const Icon(Icons.camera_alt),
                 title: const Text('Add Photo from Camera'),
                 onTap: () {
-                  Navigator.pop(context); // Close bottom sheet
+                  Navigator.pop(context);
                   _navigateToAddEditEntry(context, null, imageSource: 'camera');
                 },
               ),
@@ -115,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: const Icon(Icons.image),
                 title: const Text('Add Photo from Gallery'),
                 onTap: () {
-                  Navigator.pop(context); // Close bottom sheet
+                  Navigator.pop(context);
                   _navigateToAddEditEntry(context, null, imageSource: 'gallery');
                 },
               ),
@@ -137,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
     if (result == true) {
-      _loadDiaryEntries(); // Reload if entry was added/edited/deleted
+      _loadDiaryEntries();
     }
   }
 
@@ -147,14 +145,11 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     if (index == 0) {
-      // Home tab - do nothing, already on home
-      _loadDiaryEntries(); // Ensure entries are fresh if re-selecting Home
+      _loadDiaryEntries();
     } else if (index == 1) {
-      // Reflection tab
       Navigator.of(context).push(
         MaterialPageRoute(builder: (context) => const ReflectionScreen()),
       ).then((_) {
-        // After returning from ReflectionScreen, ensure Home is selected
         setState(() {
           _currentIndex = 0;
         });
@@ -166,19 +161,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Removed `leading` property and put all actions back into `actions` list
         title: const Text(
           'Diarify',
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
-          // Refresh button (now on the right)
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadDiaryEntries,
-          ),
-          // Settings button (now on the right)
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
@@ -187,19 +175,6 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
-          // Search Icon Button (to toggle search bar visibility below AppBar)
-          IconButton(
-            icon: Icon(_showSearchBar ? Icons.close : Icons.search),
-            onPressed: () {
-              setState(() {
-                _showSearchBar = !_showSearchBar;
-                if (!_showSearchBar) {
-                  _searchController.clear(); // Clear search when closing
-                }
-              });
-            },
-          ),
-          // Calendar button back in actions
           IconButton(
             icon: const Icon(Icons.calendar_today),
             onPressed: () => _selectDate(context),
@@ -208,32 +183,30 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
-          // Search Bar below AppBar
-          if (_showSearchBar) // Conditionally show the search bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search entries...',
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  fillColor: Theme.of(context).cardColor, // Use card color for background
-                  contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
-                ),
-                style: const TextStyle(fontSize: 16),
-                onChanged: (value) => _onSearchChanged(), // Trigger search on change
-              ),
-            ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              'Entries for: ${DateFormat('EEEE, MMM d, yyyy').format(_selectedDate)}', // Corrected format to include year
+              'Entries for: ${DateFormat('EEEE, MMM d, yyyy').format(_selectedDate)}',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search entries...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Theme.of(context).cardColor,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
+              ),
+              style: const TextStyle(fontSize: 16),
+              onChanged: (value) => _onSearchChanged(),
             ),
           ),
           Expanded(
@@ -250,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemBuilder: (context, index) {
                       final entry = _filteredDiaryEntries[index];
                       return Dismissible(
-                        key: Key(entry.id.toString()), // Unique key for Dismissible
+                        key: Key(entry.id.toString()),
                         direction: DismissDirection.endToStart,
                         background: Container(
                           color: Colors.red,
@@ -285,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Entry "${entry.title}" deleted')),
                             );
-                            _loadDiaryEntries(); // Refresh the list
+                            _loadDiaryEntries();
                           }
                         },
                         child: DiaryCard(
@@ -298,7 +271,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      // FAB for Add New Entry remains centerDocked
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () => _onFabTapped(context),
@@ -316,7 +288,6 @@ class _HomeScreenState extends State<HomeScreen> {
               color: _currentIndex == 0 ? Theme.of(context).primaryColor : Colors.grey,
               onPressed: () => _onItemTapped(0),
             ),
-            // Spacer for FAB
             const SizedBox(width: 48),
             IconButton(
               icon: const Icon(Icons.bar_chart),
