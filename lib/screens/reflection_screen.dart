@@ -18,6 +18,7 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
   Map<String, int> _dailyEntryCounts = {};
   Map<String, int> _weeklyEntryCounts = {};
   bool _isLoading = true;
+  String _filterType = 'day';
 
   @override
   void initState() {
@@ -30,7 +31,6 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
       _isLoading = true;
     });
     if (AppConstants.currentUserId == null) {
-      // Handle case where user ID is not set
       setState(() {
         _isLoading = false;
       });
@@ -51,8 +51,43 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Reflections'),
+        title: Text(
+          'Your Reflections',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
         centerTitle: true,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: DropdownButton<String>(
+              value: _filterType,
+              underline: const SizedBox(),
+              icon: const Icon(Icons.filter_list, color: Colors.white),
+              dropdownColor: Theme.of(context).canvasColor,
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    _filterType = newValue;
+                  });
+                }
+              },
+              items: [
+               DropdownMenuItem(
+                value: 'day',
+                child: Text('Day', style: Theme.of(context).textTheme.bodyMedium),
+              ),
+              DropdownMenuItem(
+                value: 'week',
+                child: Text('Week', style: Theme.of(context).textTheme.bodyMedium),
+              ),
+              DropdownMenuItem(
+                value: 'month',
+                child: Text('Month', style: Theme.of(context).textTheme.bodyMedium),
+              ),
+            ],
+            ),
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -69,16 +104,20 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Mood Statistics',
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 16),
                           _moodStatistics.isEmpty
-                              ? const Center(child: Text('No mood data available yet.'))
+                              ? Center(
+                                  child: Text(
+                                    'No mood data available yet.',
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                )
                               : PieChart(
-                                  dataMap: _moodStatistics.map(
-                                      (key, value) => MapEntry(key, value.toDouble())),
+                                  dataMap: _moodStatistics.map((key, value) => MapEntry(key, value.toDouble())),
                                   animationDuration: const Duration(milliseconds: 800),
                                   chartLegendSpacing: 32,
                                   chartRadius: MediaQuery.of(context).size.width / 2.5,
@@ -91,18 +130,16 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                                     Colors.teal,
                                     Colors.purple,
                                     Colors.pink
-                                  ], // Customize colors
+                                  ],
                                   initialAngleInDegree: 0,
                                   chartType: ChartType.ring,
                                   ringStrokeWidth: 32,
                                   centerText: "Moods",
-                                  legendOptions: const LegendOptions(
+                                  legendOptions: LegendOptions(
                                     showLegendsInRow: false,
                                     legendPosition: LegendPosition.right,
                                     showLegends: true,
-                                    legendTextStyle: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    legendTextStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
                                   ),
                                   chartValuesOptions: const ChartValuesOptions(
                                     showChartValueBackground: true,
@@ -125,13 +162,16 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Daily Entry Count (Last 7 Days)',
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 16),
                           _dailyEntryCounts.isEmpty
-                              ? const Text('No daily entries recorded.')
+                              ? Text(
+                                  'No daily entries recorded.',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                )
                               : ListView.builder(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
@@ -146,11 +186,11 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                                         children: [
                                           Text(
                                             DateFormat('MMM d, yyyy').format(DateTime.parse(date)),
-                                            style: const TextStyle(fontSize: 16),
+                                            style: Theme.of(context).textTheme.bodyMedium,
                                           ),
                                           Text(
                                             '$count entries',
-                                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                                           ),
                                         ],
                                       ),
@@ -170,13 +210,16 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Weekly Entry Count (Last 4 Weeks)',
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 16),
                           _weeklyEntryCounts.isEmpty
-                              ? const Text('No weekly entries recorded.')
+                              ? Text(
+                                  'No weekly entries recorded.',
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                )
                               : ListView.builder(
                                   shrinkWrap: true,
                                   physics: const NeverScrollableScrollPhysics(),
@@ -184,7 +227,6 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                                   itemBuilder: (context, index) {
                                     String week = _weeklyEntryCounts.keys.elementAt(index);
                                     int count = _weeklyEntryCounts.values.elementAt(index);
-                                    // 'week' is in 'YYYY-WW' format. Can parse or display as is.
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(vertical: 4.0),
                                       child: Row(
@@ -192,11 +234,11 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                                         children: [
                                           Text(
                                             'Week $week',
-                                            style: const TextStyle(fontSize: 16),
+                                            style: Theme.of(context).textTheme.bodyMedium,
                                           ),
                                           Text(
                                             '$count entries',
-                                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                                           ),
                                         ],
                                       ),
@@ -205,24 +247,6 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                                 ),
                         ],
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Example of scheduling a daily reminder at 8 PM
-                        NotificationService().scheduleDailyNotification(
-                            0, 'Diarify Reminder', 'Don\'t forget to write in your diary today!', 20, 0);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Daily reminder set for 8 PM!')),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                      ),
-                      child: const Text('Set Daily Diary Reminder (8 PM)', style: TextStyle(fontSize: 16)),
                     ),
                   ),
                 ],

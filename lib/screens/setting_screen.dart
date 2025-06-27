@@ -21,24 +21,6 @@ class SettingScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          // Theme Toggle
-          ListTile(
-            title: const Text('Dark Mode'),
-            trailing: Switch(
-              value: appSettings.themeMode == ThemeMode.dark,
-              onChanged: (isOn) {
-                appSettings.setThemeMode(isOn ? ThemeMode.dark : ThemeMode.light);
-              },
-            ),
-            onTap: () {
-              // Also allow tapping the row to toggle
-              appSettings.setThemeMode(
-                appSettings.themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark,
-              );
-            },
-          ),
-          const Divider(),
-
           // Font Size Dropdown
           ListTile(
             title: const Text('Font Size'),
@@ -72,8 +54,6 @@ class SettingScreen extends StatelessWidget {
                 DropdownMenuItem(value: 'Roboto', child: Text('Default (Roboto)')),
                 DropdownMenuItem(value: 'serif', child: Text('Serif (Fallback)')),
                 DropdownMenuItem(value: 'sans-serif', child: Text('Sans-Serif (Fallback)')),
-                // To use custom fonts, you'd add them to pubspec.yaml and map their family names here.
-                // e.g., DropdownMenuItem(value: 'OpenSans', child: Text('Open Sans')),
               ],
             ),
           ),

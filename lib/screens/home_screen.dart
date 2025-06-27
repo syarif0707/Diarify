@@ -6,7 +6,7 @@ import '../utils/app_constants.dart';
 import 'add_edit_entry_screen.dart';
 import 'reflection_screen.dart';
 import '../widgets/diary_card.dart';
-import 'setting_screen.dart'; // Import the SettingScreen
+import 'setting_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -85,45 +85,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _onFabTapped(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.add),
-                title: const Text('Add New Entry'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _navigateToAddEditEntry(context, null);
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Add Photo from Camera'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _navigateToAddEditEntry(context, null, imageSource: 'camera');
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.image),
-                title: const Text('Add Photo from Gallery'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _navigateToAddEditEntry(context, null, imageSource: 'gallery');
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   void _navigateToAddEditEntry(BuildContext context, DiaryEntry? entry, {String? imageSource}) async {
     final result = await Navigator.of(context).push(
       MaterialPageRoute(
@@ -140,21 +101,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-
     if (index == 0) {
       _loadDiaryEntries();
     } else if (index == 1) {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => const ReflectionScreen()),
-      ).then((_) {
-        setState(() {
-          _currentIndex = 0;
-        });
-      });
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (context) => const ReflectionScreen()))
+          .then((_) => _loadDiaryEntries());
+    } else if (index == 2) {
+      _navigateToAddEditEntry(context, null);
     }
+    setState(() {
+      _currentIndex = index;
+    });
   }
 
   @override
@@ -175,124 +133,145 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.calendar_today),
-            onPressed: () => _selectDate(context),
-          ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'Entries for: ${DateFormat('EEEE, MMM d, yyyy').format(_selectedDate)}',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Positioned.fill(
+            child: Image.asset(
+              'assets/paper.jpg',
+              fit: BoxFit.cover,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search entries...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                  borderSide: BorderSide.none,
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.3),
+            ),
+          ),
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  'Entries for: ${DateFormat('EEEE, MMM d, yyyy').format(_selectedDate)}',
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                filled: true,
-                fillColor: Theme.of(context).cardColor,
-                contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
               ),
-              style: const TextStyle(fontSize: 16),
-              onChanged: (value) => _onSearchChanged(),
-            ),
-          ),
-          Expanded(
-            child: _filteredDiaryEntries.isEmpty
-                ? Center(
-                    child: Text(
-                      _searchController.text.isEmpty
-                          ? 'No diary entries for this date. Create one!'
-                          : 'No entries found matching "${_searchController.text}".',
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search entries...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      borderSide: BorderSide.none,
                     ),
-                  )
-                : ListView.builder(
-                    itemCount: _filteredDiaryEntries.length,
-                    itemBuilder: (context, index) {
-                      final entry = _filteredDiaryEntries[index];
-                      return Dismissible(
-                        key: Key(entry.id.toString()),
-                        direction: DismissDirection.endToStart,
-                        background: Container(
-                          color: Colors.red,
-                          alignment: Alignment.centerRight,
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: const Icon(Icons.delete, color: Colors.white),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.5),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
+                  ),
+                  style: const TextStyle(fontSize: 16),
+                  onChanged: (value) => _onSearchChanged(),
+                ),
+              ),
+              Expanded(
+                child: _filteredDiaryEntries.isEmpty
+                    ? Center(
+                        child: Text(
+                          _searchController.text.isEmpty
+                              ? 'No diary entries for this date. Create one!'
+                              : 'No entries found matching "${_searchController.text}".',
+                          style: const TextStyle(color: Colors.white),
                         ),
-                        confirmDismiss: (direction) async {
-                          return await showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text("Confirm Delete"),
-                                content: const Text("Are you sure you want to delete this entry?"),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () => Navigator.of(context).pop(false),
-                                    child: const Text("Cancel"),
-                                  ),
-                                  TextButton(
-                                    onPressed: () => Navigator.of(context).pop(true),
-                                    child: const Text("Delete"),
-                                  ),
-                                ],
+                      )
+                    : ListView.builder(
+                        itemCount: _filteredDiaryEntries.length,
+                        itemBuilder: (context, index) {
+                          final entry = _filteredDiaryEntries[index];
+                          return Dismissible(
+                            key: Key(entry.id.toString()),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              color: Colors.red,
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              child: const Icon(Icons.delete, color: Colors.white),
+                            ),
+                            confirmDismiss: (direction) async {
+                              return await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text("Confirm Delete"),
+                                    content: const Text("Are you sure you want to delete this entry?"),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(false),
+                                        child: const Text("Cancel"),
+                                      ),
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(true),
+                                        child: const Text("Delete"),
+                                      ),
+                                    ],
+                                  );
+                                },
                               );
                             },
+                            onDismissed: (direction) async {
+                              if (entry.id != null) {
+                                await _dbHelper.deleteDiaryEntry(entry.id!);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Entry "${entry.title}" deleted')),
+                                );
+                                _loadDiaryEntries();
+                              }
+                            },
+                            child: DiaryCard(
+                              entry: entry,
+                              onTap: () => _navigateToAddEditEntry(context, entry),
+                            ),
                           );
                         },
-                        onDismissed: (direction) async {
-                          if (entry.id != null) {
-                            await _dbHelper.deleteDiaryEntry(entry.id!);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Entry "${entry.title}" deleted')),
-                            );
-                            _loadDiaryEntries();
-                          }
-                        },
-                        child: DiaryCard(
-                          entry: entry,
-                          onTap: () => _navigateToAddEditEntry(context, entry),
-                        ),
-                      );
-                    },
-                  ),
+                      ),
+              ),
+            ],
+          ),
+          Positioned(
+            bottom: 72,
+            right: 16,
+            child: FloatingActionButton.small(
+              heroTag: "calendarPicker",
+              onPressed: () => _selectDate(context),
+              child: const Icon(Icons.calendar_today),
+            ),
           ),
         ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _onFabTapped(context),
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add),
-      ),
       bottomNavigationBar: BottomAppBar(
+        color: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor,
         shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             IconButton(
-              icon: const Icon(Icons.home),
-              color: _currentIndex == 0 ? Theme.of(context).primaryColor : Colors.grey,
+              icon: const Icon(Icons.bar_chart),
+              color: _currentIndex == 1 ? Theme.of(context).floatingActionButtonTheme.backgroundColor : Colors.grey[200],
+              onPressed: () => _onItemTapped(1),
+            ),
+            IconButton(
+              icon: Icon(Icons.home,
+                  color: _currentIndex == 0
+                      ? Theme.of(context).floatingActionButtonTheme.backgroundColor
+                      : Colors.grey[200]),
               onPressed: () => _onItemTapped(0),
             ),
-            const SizedBox(width: 48),
             IconButton(
-              icon: const Icon(Icons.bar_chart),
-              color: _currentIndex == 1 ? Theme.of(context).primaryColor : Colors.grey,
-              onPressed: () => _onItemTapped(1),
+              icon: const Icon(Icons.add_circle),
+              color: _currentIndex == 2 ? Theme.of(context).floatingActionButtonTheme.backgroundColor : Colors.grey[200],
+              onPressed: () => _onItemTapped(2),
             ),
           ],
         ),
