@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import '../database/database_helper.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:intl/intl.dart';
+import '../widgets/bottom_nav_bar.dart';
+import 'home_screen.dart';
+import 'add_edit_entry_screen.dart';
 
 class ReflectionScreen extends StatefulWidget {
   const ReflectionScreen({super.key});
@@ -47,6 +50,22 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
     });
   }
 
+  void _onItemTapped(int index) {
+    if (index == 0) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } else if (index == 1) {
+      // Stay on Reflection screen
+    } else if (index == 2) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => AddEditEntryScreen(initialDate: DateTime.now()),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,19 +91,19 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                 }
               },
               items: [
-               DropdownMenuItem(
-                value: 'day',
-                child: Text('Day', style: Theme.of(context).textTheme.bodyMedium),
-              ),
-              DropdownMenuItem(
-                value: 'week',
-                child: Text('Week', style: Theme.of(context).textTheme.bodyMedium),
-              ),
-              DropdownMenuItem(
-                value: 'month',
-                child: Text('Month', style: Theme.of(context).textTheme.bodyMedium),
-              ),
-            ],
+                DropdownMenuItem(
+                  value: 'day',
+                  child: Text('Day', style: Theme.of(context).textTheme.bodyMedium),
+                ),
+                DropdownMenuItem(
+                  value: 'week',
+                  child: Text('Week', style: Theme.of(context).textTheme.bodyMedium),
+                ),
+                DropdownMenuItem(
+                  value: 'month',
+                  child: Text('Month', style: Theme.of(context).textTheme.bodyMedium),
+                ),
+              ],
             ),
           ),
         ],
@@ -139,7 +158,10 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                                     showLegendsInRow: false,
                                     legendPosition: LegendPosition.right,
                                     showLegends: true,
-                                    legendTextStyle: Theme.of(context).textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
+                                    legendTextStyle: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium!
+                                        .copyWith(fontWeight: FontWeight.bold),
                                   ),
                                   chartValuesOptions: const ChartValuesOptions(
                                     showChartValueBackground: true,
@@ -252,6 +274,10 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                 ],
               ),
             ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: 1,
+        onTap: _onItemTapped,
+      ),
     );
   }
 }

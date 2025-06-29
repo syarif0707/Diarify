@@ -12,27 +12,43 @@ class BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final navTheme = theme.bottomNavigationBarTheme;
+
+    Color getColor(int index) {
+      return currentIndex == index
+          ? navTheme.selectedItemColor ?? theme.primaryColor
+          : navTheme.unselectedItemColor ?? Colors.grey[200]!;
+    }
+
+    double getSize(int index) {
+      return currentIndex == index
+          ? navTheme.selectedIconTheme?.size ?? 30
+          : navTheme.unselectedIconTheme?.size ?? 25;
+    }
+
     return BottomAppBar(
-      color: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor,
+      color: navTheme.backgroundColor ?? theme.primaryColor,
       shape: const CircularNotchedRectangle(),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
           IconButton(
-            icon: const Icon(Icons.bar_chart),
-            color: currentIndex == 1 ? Theme.of(context).primaryColor : Colors.grey[200],
+            icon: Icon(Icons.bar_chart),
+            color: getColor(1),
+            iconSize: getSize(1),
             onPressed: () => onTap(1),
           ),
           IconButton(
-            icon: Icon(Icons.home,
-                color: currentIndex == 0
-                    ? Theme.of(context).floatingActionButtonTheme.backgroundColor
-                    : Colors.grey[200]),
+            icon: Icon(Icons.home),
+            color: getColor(0),
+            iconSize: getSize(0),
             onPressed: () => onTap(0),
           ),
           IconButton(
-            icon: const Icon(Icons.add_circle),
-            color: currentIndex == 2 ? Theme.of(context).primaryColor : Colors.grey[200],
+            icon: Icon(Icons.add_circle),
+            color: getColor(2),
+            iconSize: getSize(2),
             onPressed: () => onTap(2),
           ),
         ],

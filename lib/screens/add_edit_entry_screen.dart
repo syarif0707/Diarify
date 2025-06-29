@@ -1,10 +1,13 @@
 import 'dart:io';
-import 'package:diarify/utils/app_constants.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../database/database_helper.dart';
 import '../models/diary_entry.dart';
+import '../utils/app_constants.dart';
+import '../widgets/bottom_nav_bar.dart';
+import 'home_screen.dart';
+import 'reflection_screen.dart';
 
 class AddEditEntryScreen extends StatefulWidget {
   final DiaryEntry? diaryEntry; // For editing existing entry
@@ -50,7 +53,6 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
     _entryDate = widget.initialDate;
 
     if (widget.diaryEntry != null) {
-      // Editing existing entry
       _titleController.text = widget.diaryEntry!.title;
       _contentController.text = widget.diaryEntry!.content;
       _selectedMood = widget.diaryEntry!.mood;
@@ -88,30 +90,30 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
       }
 
       final newEntry = DiaryEntry(
-        id: widget.diaryEntry?.id, // ID will be null for new entry, present for update
+        id: widget.diaryEntry?.id,
         userId: AppConstants.currentUserId!,
         title: _titleController.text,
         content: _contentController.text,
-        mood: _selectedMood ?? 'Neutral', // Default mood if not selected
+        mood: _selectedMood ?? 'Neutral',
         entryDate: _entryDate!,
         imagePath: _imagePath,
-        imageCaption: _imageCaptionController.text.trim().isEmpty ? null : _imageCaptionController.text.trim(),
+        imageCaption: _imageCaptionController.text.trim().isEmpty
+            ? null
+            : _imageCaptionController.text.trim(),
       );
 
       if (widget.diaryEntry == null) {
-        // Add new entry
         await _dbHelper.insertDiaryEntry(newEntry);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Diary entry added!')),
         );
       } else {
-        // Update existing entry
         await _dbHelper.updateDiaryEntry(newEntry);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Diary entry updated!')),
         );
       }
-      Navigator.of(context).pop(true); // Pop with true to indicate data change
+      Navigator.of(context).pop(true);
     }
   }
 
@@ -129,6 +131,26 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
     }
   }
 
+  void _onItemTapped(int index) {
+    if (index == 0) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } else if (index == 1) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const ReflectionScreen()),
+      );
+    } else if (index == 2) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => AddEditEntryScreen(
+            initialDate: DateTime.now(),
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -141,7 +163,8 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.diaryEntry == null ? 'New Diary Entry' : 'Edit Diary Entry'),
+        title:
+            Text(widget.diaryEntry == null ? 'New Diary Entry' : 'Edit Diary Entry'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -220,7 +243,8 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
                           controller: TextEditingController(
                             text: _entryDate == null
                                 ? ''
-                                : DateFormat('MMM d, yyyy').format(_entryDate!),
+                                : DateFormat('MMM d, yyyy')
+                                    .format(_entryDate!),
                           ),
                           decoration: const InputDecoration(
                             labelText: 'Date',
@@ -300,7 +324,9 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
                     ),
                   ),
                   child: Text(
-                    widget.diaryEntry == null ? 'Save Entry' : 'Update Entry',
+                    widget.diaryEntry == null
+                        ? 'Save Entry'
+                        : 'Update Entry',
                     style: const TextStyle(fontSize: 18),
                   ),
                 ),
@@ -308,6 +334,10 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: 2,
+        onTap: _onItemTapped,
       ),
     );
   }

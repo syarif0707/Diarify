@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import '../database/database_helper.dart';
 import '../models/diary_entry.dart';
 import '../utils/app_constants.dart';
@@ -7,6 +8,7 @@ import 'add_edit_entry_screen.dart';
 import 'reflection_screen.dart';
 import '../widgets/diary_card.dart';
 import 'setting_screen.dart';
+import '../widgets/bottom_nav_bar.dart'; // << import your custom bottom nav
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -138,12 +140,6 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              'assets/paper.jpg',
-              fit: BoxFit.cover,
-            ),
-          ),
-          Positioned.fill(
             child: Container(
               color: Colors.black.withOpacity(0.3),
             ),
@@ -250,31 +246,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: BottomAppBar(
-        color: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor,
-        shape: const CircularNotchedRectangle(),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.bar_chart),
-              color: _currentIndex == 1 ? Theme.of(context).floatingActionButtonTheme.backgroundColor : Colors.grey[200],
-              onPressed: () => _onItemTapped(1),
-            ),
-            IconButton(
-              icon: Icon(Icons.home,
-                  color: _currentIndex == 0
-                      ? Theme.of(context).floatingActionButtonTheme.backgroundColor
-                      : Colors.grey[200]),
-              onPressed: () => _onItemTapped(0),
-            ),
-            IconButton(
-              icon: const Icon(Icons.add_circle),
-              color: _currentIndex == 2 ? Theme.of(context).floatingActionButtonTheme.backgroundColor : Colors.grey[200],
-              onPressed: () => _onItemTapped(2),
-            ),
-          ],
-        ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: _onItemTapped,
       ),
     );
   }
