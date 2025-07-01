@@ -72,6 +72,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: const Text('Change Password'),
         centerTitle: true,
@@ -87,8 +88,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 TextFormField(
                   controller: _currentPasswordController,
                   decoration: const InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
                     labelText: 'Current Password',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
                   ),
                   obscureText: true,
                   validator: (value) {
@@ -102,8 +107,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 TextFormField(
                   controller: _newPasswordController,
                   decoration: const InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
                     labelText: 'New Password',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
                   ),
                   obscureText: true,
                   validator: (value) {
@@ -120,8 +129,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 TextFormField(
                   controller: _confirmNewPasswordController,
                   decoration: const InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white,
                     labelText: 'Confirm New Password',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
                   ),
                   obscureText: true,
                   validator: (value) {
@@ -138,6 +151,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ElevatedButton(
                   onPressed: _changePassword,
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromARGB(255, 1, 56, 102),
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),

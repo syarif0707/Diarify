@@ -140,6 +140,7 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: Text(widget.diaryEntry == null ? 'New Diary Entry' : 'Edit Diary Entry'),
         centerTitle: true,

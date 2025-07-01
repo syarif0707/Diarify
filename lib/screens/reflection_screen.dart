@@ -1,9 +1,12 @@
+import 'package:diarify/screens/home_screen.dart';
+import 'package:diarify/screens/setting_screen.dart';
 import 'package:diarify/services/notification_service.dart';
 import 'package:diarify/utils/app_constants.dart';
 import 'package:flutter/material.dart';
 import '../database/database_helper.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:intl/intl.dart';
+import '../widgets/bottom_nav_bar.dart';
 
 class ReflectionScreen extends StatefulWidget {
   const ReflectionScreen({super.key});
@@ -30,7 +33,6 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
       _isLoading = true;
     });
     if (AppConstants.currentUserId == null) {
-      // Handle case where user ID is not set
       setState(() {
         _isLoading = false;
       });
@@ -50,6 +52,7 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: const Text('Your Reflections'),
         centerTitle: true,
@@ -78,7 +81,7 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                               ? const Center(child: Text('No mood data available yet.'))
                               : PieChart(
                                   dataMap: _moodStatistics.map(
-                                      (key, value) => MapEntry(key, value.toDouble())),
+                                    (key, value) => MapEntry(key, value.toDouble())),
                                   animationDuration: const Duration(milliseconds: 800),
                                   chartLegendSpacing: 32,
                                   chartRadius: MediaQuery.of(context).size.width / 2.5,
@@ -91,7 +94,7 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                                     Colors.teal,
                                     Colors.purple,
                                     Colors.pink
-                                  ], // Customize colors
+                                  ],
                                   initialAngleInDegree: 0,
                                   chartType: ChartType.ring,
                                   ringStrokeWidth: 32,
@@ -184,7 +187,6 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                                   itemBuilder: (context, index) {
                                     String week = _weeklyEntryCounts.keys.elementAt(index);
                                     int count = _weeklyEntryCounts.values.elementAt(index);
-                                    // 'week' is in 'YYYY-WW' format. Can parse or display as is.
                                     return Padding(
                                       padding: const EdgeInsets.symmetric(vertical: 4.0),
                                       child: Row(
@@ -207,27 +209,23 @@ class _ReflectionScreenState extends State<ReflectionScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Example of scheduling a daily reminder at 8 PM
-                        NotificationService().scheduleDailyNotification(
-                            0, 'Diarify Reminder', 'Don\'t forget to write in your diary today!', 20, 0);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Daily reminder set for 8 PM!')),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 15),
-                      ),
-                      child: const Text('Set Daily Diary Reminder (8 PM)', style: TextStyle(fontSize: 16)),
-                    ),
-                  ),
                 ],
               ),
             ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: 1,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            );
+          } else if (index == 2) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const SettingScreen()),
+            );
+          }
+        },
+      ),
     );
   }
 }

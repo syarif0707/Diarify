@@ -11,32 +11,28 @@ class BottomNavBar extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return BottomAppBar(
-      color: Theme.of(context).appBarTheme.backgroundColor ?? Theme.of(context).primaryColor,
-      shape: const CircularNotchedRectangle(),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.bar_chart),
-            color: currentIndex == 1 ? Theme.of(context).primaryColor : Colors.grey[200],
-            onPressed: () => onTap(1),
-          ),
-          IconButton(
-            icon: Icon(Icons.home,
-                color: currentIndex == 0
-                    ? Theme.of(context).floatingActionButtonTheme.backgroundColor
-                    : Colors.grey[200]),
-            onPressed: () => onTap(0),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add_circle),
-            color: currentIndex == 2 ? Theme.of(context).primaryColor : Colors.grey[200],
-            onPressed: () => onTap(2),
-          ),
-        ],
+Widget build(BuildContext context) {
+  return BottomNavigationBar(
+    currentIndex: currentIndex,
+    onTap: onTap,
+    type: BottomNavigationBarType.fixed,
+    selectedItemColor: Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
+    unselectedItemColor: Theme.of(context).bottomNavigationBarTheme.unselectedItemColor,
+    backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
+    items: const [
+      BottomNavigationBarItem(
+        icon: Icon(Icons.home),
+        label: 'Home',
       ),
-    );
-  }
+      BottomNavigationBarItem(
+        icon: Icon(Icons.insert_chart),  // Changed from bar_chart
+        label: 'Reflections',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.settings),
+        label: 'Settings',
+      ),
+    ],
+  );
+}
 }

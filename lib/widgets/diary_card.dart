@@ -16,44 +16,45 @@ class DiaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: const Color.fromARGB(255, 154, 223, 255), // Added card color
       margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       elevation: 4,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(12),
       ),
       child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                entry.title,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Mood: ${entry.mood}',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[700],
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                DateFormat('MMM d, yyyy - hh:mm a').format(entry.entryDate),
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+          entry.title,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+          'Mood: ${entry.mood}',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.grey[700],
+          ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+          DateFormat('MMM d, yyyy - hh:mm a').format(entry.entryDate),
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
+          ),
+          const SizedBox(height: 12),
+          Text(
                 entry.content,
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,

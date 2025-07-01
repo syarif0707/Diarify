@@ -6,7 +6,8 @@ import '../utils/app_constants.dart';
 import 'add_edit_entry_screen.dart';
 import 'reflection_screen.dart';
 import '../widgets/diary_card.dart';
-import 'setting_screen.dart'; // Import the SettingScreen
+import 'setting_screen.dart';
+import '../widgets/bottom_nav_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -140,47 +141,40 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
+  setState(() {
+    _currentIndex = index;
+  });
 
-    if (index == 0) {
-      _loadDiaryEntries();
-    } else if (index == 1) {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => const ReflectionScreen()),
-      ).then((_) {
-        setState(() {
-          _currentIndex = 0;
-        });
-      });
-    }
+  if (index == 0) {
+    // Already on home screen
+  } else if (index == 1) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => const ReflectionScreen()),
+    );
+  } else if (index == 2) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => const SettingScreen()),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: const Text(
-          'Diarify',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => const SettingScreen()),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.calendar_today),
-            onPressed: () => _selectDate(context),
-          ),
-        ],
-      ),
+  title: const Text(
+    'Diarify',
+    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+  ),
+  centerTitle: true,
+  actions: [
+    IconButton(
+      icon: const Icon(Icons.calendar_today),
+      onPressed: () => _selectDate(context),
+    ),
+  ],
+),
       body: Column(
         children: [
           Padding(
@@ -194,15 +188,18 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: TextField(
               controller: _searchController,
-              decoration: InputDecoration(
+                decoration: InputDecoration(
                 hintText: 'Search entries...',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: Colors.grey.withOpacity(0.7),
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: Theme.of(context).cardColor,
+                fillColor: Theme.of(context).cardColor.withOpacity(0.7),
                 contentPadding: const EdgeInsets.symmetric(vertical: 10.0),
               ),
               style: const TextStyle(fontSize: 16),
@@ -272,31 +269,18 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _onFabTapped(context),
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            IconButton(
-              icon: const Icon(Icons.home),
-              color: _currentIndex == 0 ? Theme.of(context).primaryColor : Colors.grey,
-              onPressed: () => _onItemTapped(0),
-            ),
-            const SizedBox(width: 48),
-            IconButton(
-              icon: const Icon(Icons.bar_chart),
-              color: _currentIndex == 1 ? Theme.of(context).primaryColor : Colors.grey,
-              onPressed: () => _onItemTapped(1),
-            ),
-          ],
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 100.0), // Increase this value for more height
+        child: FloatingActionButton(
+          onPressed: () => _onFabTapped(context),
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add),
         ),
       ),
-    );
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: _onItemTapped,
+      ),
+        );
   }
 }
