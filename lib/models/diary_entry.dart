@@ -1,5 +1,6 @@
 class DiaryEntry {
   int? id;
+  final int? cardColor; // Optional field for card color
   int userId;
   String title;
   String content;
@@ -17,6 +18,7 @@ class DiaryEntry {
     required this.entryDate,
     this.imagePath,
     this.imageCaption,
+    this.cardColor, // Initialize cardColor if needed
   });
 
   Map<String, dynamic> toMap() {
@@ -29,6 +31,7 @@ class DiaryEntry {
       'entryDate': entryDate.toIso8601String(), // Store as ISO 8601 string
       'imagePath': imagePath,
       'imageCaption': imageCaption,
+      'cardColor': cardColor,
     };
   }
 
@@ -42,6 +45,7 @@ class DiaryEntry {
       entryDate: DateTime.parse(map['entryDate']),
       imagePath: map['imagePath'],
       imageCaption: map['imageCaption'],
+      cardColor: map['cardColor'],
     );
   }
 }

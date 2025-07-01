@@ -13,52 +13,68 @@ class DiaryCard extends StatelessWidget {
     required this.onTap,
   });
 
+  Color _getTextColorForBackground(Color backgroundColor) {
+    return backgroundColor.computeLuminance() > 0.5 
+        ? Colors.black 
+        : Colors.white;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final cardColor = entry.cardColor != null 
+        ? Color(entry.cardColor!) 
+        : Theme.of(context).cardTheme.color ?? Colors.white;
+    final textColor = _getTextColorForBackground(cardColor);
+    final secondaryTextColor = textColor.withOpacity(0.8);
+
     return Card(
-      color: const Color.fromARGB(255, 154, 223, 255), // Added card color
+      color: cardColor,
       margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       elevation: 4,
       shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-          entry.title,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-          'Mood: ${entry.mood}',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey[700],
-          ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-          DateFormat('MMM d, yyyy - hh:mm a').format(entry.entryDate),
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
-          ),
-          ),
-          const SizedBox(height: 12),
-          Text(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                entry.title,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: textColor,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Mood: ${entry.mood}',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: secondaryTextColor,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                DateFormat('MMM d, yyyy - hh:mm a').format(entry.entryDate),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: secondaryTextColor,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
                 entry.content,
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 16),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: textColor,
+                ),
               ),
               if (entry.imagePath != null && entry.imagePath!.isNotEmpty) ...[
                 const SizedBox(height: 12),
@@ -69,7 +85,7 @@ class DiaryCard extends StatelessWidget {
                     height: 150,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(), // Hide if image path is invalid
+                    errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
                   ),
                 ),
                 if (entry.imageCaption != null && entry.imageCaption!.isNotEmpty)
@@ -77,7 +93,11 @@ class DiaryCard extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
                       entry.imageCaption!,
-                      style: TextStyle(fontSize: 14, fontStyle: FontStyle.italic, color: Colors.grey[700]),
+                      style: TextStyle(
+                        fontSize: 14, 
+                        fontStyle: FontStyle.italic,
+                        color: secondaryTextColor,
+                      ),
                     ),
                   ),
               ],

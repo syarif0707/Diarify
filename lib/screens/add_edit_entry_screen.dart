@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../database/database_helper.dart';
 import '../models/diary_entry.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class AddEditEntryScreen extends StatefulWidget {
   final DiaryEntry? diaryEntry; // For editing existing entry
@@ -32,6 +33,7 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
   String? _imagePath;
   final ImagePicker _picker = ImagePicker();
   final DatabaseHelper _dbHelper = DatabaseHelper();
+  Color _selectedColor = Colors.white; // Default color for the entry card
 
   final List<String> _moodOptions = [
     'Happy',
@@ -77,7 +79,35 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
       });
     }
   }
-
+  void _showColorPicker(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Select Card Color'),
+        content: SingleChildScrollView(
+          child: ColorPicker(
+            pickerColor: _selectedColor,
+            onColorChanged: (color) {
+              setState(() {
+                _selectedColor = color;
+              });
+            },
+            showLabel: true,
+            pickerAreaHeightPercent: 0.7,
+            enableAlpha: false,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          ),
+        ],
+      );
+    },
+  );
+}
   void _saveEntry() async {
     if (_formKey.currentState!.validate()) {
       if (AppConstants.currentUserId == null) {
@@ -95,6 +125,7 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
         mood: _selectedMood ?? 'Neutral', // Default mood if not selected
         entryDate: _entryDate!,
         imagePath: _imagePath,
+        cardColor: _selectedColor.value,
         imageCaption: _imageCaptionController.text.trim().isEmpty ? null : _imageCaptionController.text.trim(),
       );
 
@@ -155,8 +186,12 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
                   labelText: 'Title',
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -170,9 +205,13 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
                 controller: _contentController,
                 maxLines: 8,
                 decoration: const InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
                   labelText: 'What\'s on your mind?',
                   alignLabelWithHint: true,
-                  border: OutlineInputBorder(),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -189,7 +228,11 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
                       value: _selectedMood,
                       hint: const Text('Select Mood'),
                       decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
                         labelText: 'Mood',
                       ),
                       items: _moodOptions.map((String mood) {
@@ -224,8 +267,12 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
                                 : DateFormat('MMM d, yyyy').format(_entryDate!),
                           ),
                           decoration: const InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
                             labelText: 'Date',
-                            border: OutlineInputBorder(),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                            ),
                             suffixIcon: Icon(Icons.calendar_today),
                           ),
                         ),
@@ -234,6 +281,23 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
                   ),
                 ],
               ),
+              // Add this widget after the date picker row
+const SizedBox(height: 16),
+ListTile(
+  title: Text('Card Color'),
+  trailing: GestureDetector(
+    onTap: () => _showColorPicker(context),
+    child: Container(
+      width: 30,
+      height: 30,
+      decoration: BoxDecoration(
+        color: _selectedColor,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.grey),
+      ),
+    ),
+  ),
+),
               const SizedBox(height: 16),
               _imagePath != null
                   ? Column(
@@ -276,6 +340,8 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
                           label: const Text('Add Photo from Camera'),
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size(double.infinity, 50),
+                            backgroundColor: Color.fromARGB(255, 1, 56, 102),
+                            foregroundColor: Colors.white,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -285,6 +351,8 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
                           label: const Text('Add Photo from Gallery'),
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size(double.infinity, 50),
+                            backgroundColor: Color.fromARGB(255, 1, 56, 102),
+                            foregroundColor: Colors.white,
                           ),
                         ),
                       ],
@@ -295,6 +363,8 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
                 child: ElevatedButton(
                   onPressed: _saveEntry,
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromARGB(255, 1, 56, 102),
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -302,7 +372,10 @@ class _AddEditEntryScreenState extends State<AddEditEntryScreen> {
                   ),
                   child: Text(
                     widget.diaryEntry == null ? 'Save Entry' : 'Update Entry',
-                    style: const TextStyle(fontSize: 18),
+                    style: const TextStyle(
+                      fontSize: 20, 
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,),
                   ),
                 ),
               ),

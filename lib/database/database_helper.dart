@@ -22,7 +22,7 @@ class DatabaseHelper {
     String dbPath = join(path, 'diarify.db');
     return await openDatabase(
       dbPath,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -47,6 +47,7 @@ class DatabaseHelper {
         mood TEXT,
         entryDate TEXT,
         imagePath TEXT,
+        cardColor INTEGER,
         imageCaption TEXT,
         FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
       )
@@ -54,13 +55,10 @@ class DatabaseHelper {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Implement upgrade logic if your database schema changes in the future
-    // For now, we'll keep it simple.
-    if (oldVersion < 1) {
-      // Example: If you add new columns in a future version
-      // await db.execute("ALTER TABLE diary_entries ADD COLUMN newColumn TEXT;");
-    }
+  if (oldVersion < 2) {  // Increment your version number
+    await db.execute('ALTER TABLE diary_entries ADD COLUMN cardColor INTEGER');
   }
+}
 
   // --- User Operations ---
 

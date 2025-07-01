@@ -192,7 +192,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 hintText: 'Search entries...',
                 prefixIcon: Icon(
                   Icons.search,
-                  color: Colors.grey.withOpacity(0.7),
+                  color: Colors.grey,
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
@@ -269,18 +269,24 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 100.0), // Increase this value for more height
-        child: FloatingActionButton(
-          onPressed: () => _onFabTapped(context),
-          shape: const CircleBorder(),
-          child: const Icon(Icons.add),
-        ),
-      ),
+floatingActionButton: Padding(
+  padding: const EdgeInsets.only(bottom: 100.0),
+  child: FloatingActionButton.extended(
+    onPressed: () => _onFabTapped(context),
+    backgroundColor: Color.fromARGB(255, 1, 56, 102), // Your primary blue color
+    foregroundColor: Colors.white, // Icon/text color
+    elevation: 4, // Shadow depth
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(30),
+     ), // Extended FAB shape
+    icon: const Icon(Icons.add),
+    label: const Text('New Entry', style: TextStyle(fontSize: 16)),
+  ),
+),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
         onTap: _onItemTapped,
       ),
-        );
+    );
   }
 }
